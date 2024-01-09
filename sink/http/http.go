@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nsqsink/sink/sink"
+	"github.com/nsqsink/sink/contract"
 )
 
 var (
@@ -108,7 +108,15 @@ func WithHeader(headers map[string]interface{}) Option {
 	}
 }
 
-func NewSink(url, method string, options ...Option) (sink.Sinker, error) {
+func NewSink(url, method string, options ...Option) (contract.Sinker, error) {
+	// validate
+	if _, err := isValidURL(url); err != nil {
+		return nil, err
+	}
+	if _, err := isValidHTTPMethod(method); err != nil {
+		return nil, err
+	}
+
 	h := &Client{
 		Headers: map[string]interface{}{},
 		client: &http.Client{

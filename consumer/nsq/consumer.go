@@ -1,4 +1,4 @@
-package consumer
+package nsq
 
 import (
 	"context"
@@ -16,6 +16,7 @@ type Module struct {
 }
 
 // New return consumer module / object
+// accepting event of the message, the handler for the event and the configuration of the consumer
 func New(ctx context.Context, e contract.Event, h contract.Handler, cfg Config) (contract.Consumer, error) {
 	// checking required data
 	if e.GetTopic() == "" {
@@ -57,7 +58,7 @@ func New(ctx context.Context, e contract.Event, h contract.Handler, cfg Config) 
 	}
 
 	// set log level
-	c.SetLoggerLevel(cfg.LogLevel.ToNSQLogLevel())
+	c.SetLoggerLevel(toNSQLogLevel(cfg.LogLevel))
 
 	// wrap handler to nsq handler
 	handlerFn := func(msg *nsq.Message) error {
@@ -76,4 +77,20 @@ func New(ctx context.Context, e contract.Event, h contract.Handler, cfg Config) 
 		nsqConsumer: c,
 		source:      e.GetSource(),
 	}, nil
+}
+
+// Run is a method to run / start the consumer to listen from an event
+func (m Module) Run() error {
+	// run the consumer by connecting to nsqlookupd
+	if err := m.nsqConsumer.ConnectToNSQDs(m.source); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Stop is a method to stop and close the consumer from listening an event
+func (m Module) Stop() error {
+	m.nsqConsumer.Stop()
+	return nil
 }

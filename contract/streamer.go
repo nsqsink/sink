@@ -1,11 +1,7 @@
-package streamer
+package contract
 
 import (
 	"context"
-
-	"github.com/nsqsink/sink/consumer"
-	"github.com/nsqsink/sink/event"
-	"github.com/nsqsink/sink/handler"
 )
 
 // Streamer is an interface which can be implemented
@@ -13,7 +9,7 @@ import (
 type Streamer interface {
 	// RegisterConsumer method
 	// method to register consumer to the streamer
-	RegisterConsumer(ctx context.Context, e event.Event, h handler.Handler, cfg consumer.Config) error
+	RegisterConsumer(ctx context.Context, c Consumer) error
 
 	// Run method
 	// method to run all consumer in the streamer

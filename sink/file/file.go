@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nsqsink/sink/sink"
+	"github.com/nsqsink/sink/contract"
 )
 
 type Client struct {
 	file *os.File
 }
 
-func NewSink(fileName string) (sink.Sinker, error) {
+func NewSink(fileName string) (contract.Sinker, error) {
 	f, err := os.Create(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file because of %s", err.Error())

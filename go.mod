@@ -8,4 +8,8 @@ require (
 	github.com/nsqio/go-nsq v1.1.0
 )
 
-require github.com/golang/snappy v0.0.1 // indirect
+require (
+	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/golang/snappy v0.0.1 // indirect
+	github.com/valyala/fastjson v1.6.4 // indirect
+)

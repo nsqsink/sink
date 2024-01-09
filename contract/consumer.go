@@ -1,4 +1,4 @@
-package consumer
+package contract
 
 type Consumer interface {
 	Run() error
