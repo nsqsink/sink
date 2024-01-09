@@ -6,9 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nsqio/go-nsq"
-	"github.com/nsqsink/sink/event"
-	"github.com/nsqsink/sink/handler"
-	"github.com/nsqsink/sink/message"
+	"github.com/nsqsink/sink/contract"
+	message "github.com/nsqsink/sink/message/nsq"
 )
 
 type Module struct {
@@ -17,7 +16,7 @@ type Module struct {
 }
 
 // New return consumer module / object
-func New(ctx context.Context, e event.Event, h handler.Handler, cfg Config) (Consumer, error) {
+func New(ctx context.Context, e contract.Event, h contract.Handler, cfg Config) (contract.Consumer, error) {
 	// checking required data
 	if e.GetTopic() == "" {
 		return nil, errors.New("empty event topic")

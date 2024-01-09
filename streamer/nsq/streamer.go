@@ -49,14 +49,14 @@ func (m *NSQModule) Stop() error {
 	errChan := make(chan error)
 
 	for _, c := range m.consumers {
-		go func(nsqConsumer *contract.Consumer) {
+		go func(nsqConsumer contract.Consumer) {
 			var err error
 			defer func() {
 				errChan <- err
 			}()
 
-			err = c.Stop()
-		}(&c)
+			err = nsqConsumer.Stop()
+		}(c)
 	}
 
 	close(errChan)
