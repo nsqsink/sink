@@ -4,6 +4,7 @@ type (
 	App struct {
 		LogLevel  string     `json:"log_level"`
 		Consumers []Consumer `json:"consumers"`
+		Washtub   string     `json:"washtub"`
 	}
 
 	Consumer struct {

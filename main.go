@@ -13,10 +13,13 @@ import (
 
 	"github.com/nsqsink/sink/config"
 	consumer "github.com/nsqsink/sink/consumer/nsq"
+	"github.com/nsqsink/sink/entity"
 	event "github.com/nsqsink/sink/event/nsq"
 	"github.com/nsqsink/sink/handler"
 	logger "github.com/nsqsink/sink/log"
+	"github.com/nsqsink/sink/pkg/network"
 	streamer "github.com/nsqsink/sink/streamer/nsq"
+	washtubhttp "github.com/nsqsink/sink/washtub/http"
 )
 
 func main() {
@@ -33,6 +36,7 @@ func main() {
 	// file configuration
 	flag.StringVar(&configFilePath, "config-path", "", "Define config file path if you want to read config from files instead of flag")
 	flag.StringVar(&cfg.LogLevel, "log-level", "", "Define log level")
+	flag.StringVar(&cfg.Washtub, "washtub", "", "Define Washtub address")
 
 	// single consumer config
 	flag.StringVar(&consumerCfg.ID, "id", "", "Define consumer id")
@@ -75,6 +79,43 @@ func main() {
 	// validate config
 	if _, err := cfg.Validate(); err != nil {
 		log.Fatalln(err)
+	}
+
+	// washtub
+	if cfg.Washtub != "" {
+		washtubURL, err := network.GetValidURL(cfg.Washtub)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		washtub, err := washtubhttp.NewWashtuber(context.Background(), washtubURL)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		ip, err := network.GetLocalIP()
+		if err != nil {
+			log.Println(err)
+			ip = fmt.Sprintf("Failed to get IP Address: %s", consumerCfg.ID)
+		}
+
+		for _, consumer := range cfg.Consumers {
+			metadata := entity.PulseRequest{
+				ChannelID: consumer.ID,
+				Topic:     consumer.Topic,
+				SinkType:  consumer.Sinker.Type,
+				Status:    "active",
+				Address:   ip,
+			}
+
+			errCh := washtub.Pulse(context.Background(), metadata)
+			go func() {
+				select {
+				case err := <-errCh:
+					log.Println(err)
+				}
+			}()
+		}
 	}
 
 	// create streamer server
